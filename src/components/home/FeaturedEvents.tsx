@@ -1,34 +1,51 @@
-import Link from 'next/link';
-import { format } from 'date-fns';
-import { CalendarDays, ChevronRight } from 'lucide-react';
-import CategoryBadge from '@/components/events/CategoryBadge';
-import { SectionHeader } from './UpcomingFests';
-import { CATEGORY_STYLES } from '@/lib/constants';
-import { EVENTS } from '@/lib/data';
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import EventCard from "@/components/events/EventCard";
+import { getEvents, getEventStats } from "@/lib/queries";
 
-export default function FeaturedEvents() {
-  const featured = EVENTS.filter((e) => e.featured).slice(0, 3);
+export async function FeaturedEvents() {
+  const all = await getEvents();
+  const now = Date.now();
+
+  // Registration still open, soonest events first
+  const events = all
+    .filter((e) => new Date(e.registration_deadline).getTime() >= now)
+    .slice(0, 3);
+
+  const stats = await getEventStats(events.map((e) => e.id));
+
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6">
-      <SectionHeader title="Featured Events" href="/events" />
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {featured.map((e) => {
-          const { Icon } = CATEGORY_STYLES[e.category];
-          return (
-            <Link key={e.id} href={`/events/${e.id}`} className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-blue-50 text-brand"><Icon size={28} /></span>
-              <div className="min-w-0 flex-1">
-                <CategoryBadge category={e.category} />
-                <h3 className="mt-1 truncate font-semibold text-navy">{e.title}</h3>
-                <p className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                  <CalendarDays size={13} />{format(new Date(e.start), 'MMM d, yyyy  •  hh:mm a')}
-                </p>
-              </div>
-              <ChevronRight className="shrink-0 text-slate-400" size={20} />
-            </Link>
-          );
-        })}
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-navy">Featured events</h2>
+          <p className="mt-1 text-sm text-slate-600">Registration is open. Grab your seat.</p>
+        </div>
+        <Link
+          href="/events"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline"
+        >
+          View all events <ArrowRight size={16} aria-hidden="true" />
+        </Link>
       </div>
+
+      {events.length === 0 ? (
+        <p className="mt-6 rounded-xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
+          No events are open for registration right now.
+        </p>
+      ) : (
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {events.map((e) => (
+            <EventCard
+              key={e.id}
+              event={e}
+              registered={stats[e.id]?.registered_count ?? 0}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
+
+export default FeaturedEvents;

@@ -3,16 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/Button";
 
 type Props = {
   eventId: string;
   title: string;
+  /** Confirmed + waitlisted registrations, shown in the warning. */
+  registrationCount?: number;
   /** If set, go to this page after deleting (used on the edit page). */
   redirectTo?: string;
 };
 
-export default function DeleteEventButton({ eventId, title, redirectTo }: Props) {
+export default function DeleteEventButton({
+  eventId,
+  title,
+  registrationCount = 0,
+  redirectTo,
+}: Props) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,42 +49,45 @@ export default function DeleteEventButton({ eventId, title, redirectTo }: Props)
 
   if (!confirming) {
     return (
-      <Button
+      <button
         type="button"
-        variant="outline"
-        className="border-red-200 text-red-700 hover:bg-red-50"
         onClick={() => setConfirming(true)}
+        className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50"
       >
         Delete
-      </Button>
+      </button>
     );
   }
 
   return (
     <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3">
       <p className="text-sm font-medium text-red-800">
-        Delete &quot;{title}&quot;? Its registrations will be affected. This cannot be undone.
+        Delete &quot;{title}&quot;?{" "}
+        {registrationCount > 0
+          ? `${registrationCount} registration${registrationCount === 1 ? "" : "s"} (including waitlist) will be affected. `
+          : ""}
+        This cannot be undone.
       </p>
       <div className="flex flex-wrap gap-2">
-        <Button
+        <button
           type="button"
-          loading={loading}
-          className="bg-red-600 hover:bg-red-700"
+          disabled={loading}
           onClick={handleDelete}
+          className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Yes, delete
-        </Button>
-        <Button
+          {loading ? "Deleting..." : "Yes, delete"}
+        </button>
+        <button
           type="button"
-          variant="ghost"
           disabled={loading}
           onClick={() => {
             setConfirming(false);
             setError(null);
           }}
+          className="inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 disabled:opacity-60"
         >
           Keep it
-        </Button>
+        </button>
       </div>
       {error && (
         <p role="alert" className="text-sm text-red-700">

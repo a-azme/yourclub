@@ -1,27 +1,35 @@
-import { CalendarDays, Star, Ticket, Users } from 'lucide-react';
-import { EVENTS, FESTS, ORGANIZATIONS } from '@/lib/data';
+import { Building2, CalendarDays, Ticket, Users } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import type { SiteStats } from "@/types";
 
-export default function StatsBar() {
-  const participants = EVENTS.reduce((s, e) => s + e.registered, 0);
-  const stats = [
-    { Icon: CalendarDays, value: FESTS.filter((f) => f.status === 'Upcoming').length, label: 'Upcoming Fests' },
-    { Icon: Ticket, value: EVENTS.length, label: 'Total Events' },
-    { Icon: Users, value: `${participants}+`, label: 'Registered Participants' },
-    { Icon: Star, value: ORGANIZATIONS.length, label: 'Active Organizations' },
+export async function StatsBar() {
+  const supabase = await createClient();
+  const { data } = await supabase.from("site_stats").select("*").single<SiteStats>();
+
+  const items = [
+    { icon: CalendarDays, value: data?.upcoming_fests ?? 0, label: "Upcoming fests" },
+    { icon: Ticket, value: data?.total_events ?? 0, label: "Events" },
+    { icon: Users, value: data?.registered_participants ?? 0, label: "Registrations" },
+    { icon: Building2, value: data?.active_organizations ?? 0, label: "Active clubs" },
   ];
+
   return (
-    <section className="bg-soft">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-7 sm:px-6 lg:grid-cols-4">
-        {stats.map(({ Icon, value, label }) => (
-          <div key={label} className="flex items-center gap-4">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-brand"><Icon size={22} /></span>
+    <section className="mx-auto max-w-7xl px-4 sm:px-6" aria-label="Site statistics">
+      <dl className="grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-4">
+        {items.map((item) => (
+          <div key={item.label} className="flex items-center gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand-light text-brand">
+              <item.icon size={22} aria-hidden="true" />
+            </span>
             <div>
-              <p className="text-xl font-bold text-navy">{value}</p>
-              <p className="text-sm text-slate-500">{label}</p>
+              <dd className="text-xl font-bold text-navy">{item.value}</dd>
+              <dt className="text-xs text-slate-500">{item.label}</dt>
             </div>
           </div>
         ))}
-      </div>
+      </dl>
     </section>
   );
 }
+
+export default StatsBar;
