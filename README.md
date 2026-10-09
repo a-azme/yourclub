@@ -14,16 +14,18 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
 - Sign up / log in with **email and password or with a Google account**
 - Browse upcoming fests and events, with search and category filters
 - Event pages with venue, schedule, fee, live seat availability and registration deadline countdown
-- One-click registration with automatic **waitlist** when an event is full
+- One-click registration: confirmed instantly when a seat is free, otherwise placed on a **waitlist**. When a seat opens up, the first person on the waitlist is confirmed automatically
 - Digital ticket with **QR code**, downloadable as a file
 - "Add to Google Calendar" link for every registered event
 - My Registrations page with the option to cancel
-- In-app notifications (registration confirmed / cancelled) with unread badge and "mark all as read"
+- In-app notifications (seat confirmed from the waitlist, cancelled or moved to the waitlist by an organizer) with unread badge and "mark all as read"
 
 **For admins**
 - Dashboard with totals, a 14-day registration trend chart, registrations by status and most popular events
 - Create, edit and delete **fests** and **events**
 - Per-event participant list with status management
+- Cancel a registration with an optional reason; the student is notified in the app
+- Seat limits enforced in the database, so a full event cannot be over-booked from the admin panel, the API or the Supabase dashboard
 - CSV export of participants *(verify this works before submitting)*
 - Check-in tracking
 - Users page: search all accounts, see their registrations, and delete an account
@@ -40,7 +42,7 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
 | Supabase client | `@supabase/supabase-js`, `@supabase/ssr` |
 | UI libraries | `lucide-react` (icons), `clsx`, `date-fns` |
 | Extras | `qrcode.react` (QR tickets), `papaparse` (CSV export) |
-| Hosting | **TODO:** e.g. Vercel |
+| Hosting | Vercel |
 
 ## 4. Setup Instructions
 
@@ -57,7 +59,7 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
    - `supabase/schema.sql` (tables, policies, triggers, views)
    - `supabase/seed.sql` (demo organizations, fests and events)
 
-   > **TODO:** these two files must be added to the repository before submission.
+   > **TODO:** these two files must be added to the repository before submission. Make sure `schema.sql` includes the `notifications` table and the registration / waitlist triggers, not only the base tables.
 
 3. **Create the environment file** `.env.local` in the project root:
    ```env
@@ -71,8 +73,8 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
 4. **Create the demo accounts** in Supabase: **Authentication → Users → Add user** (use the emails in section 6, tick "Auto Confirm User"). Then make the admin an admin:
    ```sql
    update public.profiles set role = 'admin' where email = 'admin@yourclub.dev';
-   admin login:  "admin@yourclub.dev", password: "Admin@12345"
    ```
+   Admin login: `admin@yourclub.dev` / `Admin@12345`
 
 5. **(Optional) Enable Google login.** Email/password login works without this step; the "Continue with Google" button only works after it is configured.
    1. In [Google Cloud Console](https://console.cloud.google.com), configure the **OAuth consent screen** (External, scopes `email`, `profile`, `openid`) and set it to **In production** so any Google account can sign in.
@@ -94,13 +96,7 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
 
 ## 5. Deployment URL
 
-**TODO:** https://your-app.vercel.app
-
-After deploying, add this URL in two places so Google login works on the live site:
-- Google Cloud: **Authorized JavaScript origins**
-- Supabase: **Site URL** and **Redirect URLs** (`https://your-app.vercel.app/**`)
-
-Also add the three environment variables from step 3 to the hosting provider's settings.
+**https://yourclub-lyart.vercel.app**
 
 ## 6. Demo Credentials
 
@@ -118,7 +114,7 @@ The admin panel is at `/admin`. Admin access is only available through the demo 
 | [Supabase](https://supabase.com) | PostgreSQL database, authentication, Row Level Security, server-side user management |
 | Google OAuth (Google Cloud, "Sign in with Google") | Logging in and signing up with a Google account, handled through Supabase Auth |
 | Google Calendar (URL template link) | "Add to Google Calendar" button; no API key or login needed |
-| **TODO:** hosting provider | e.g. Vercel |
+| [Vercel](https://vercel.com) | Hosting and automatic deployment from GitHub |
 
 No paid services are required to run the project.
 
@@ -126,8 +122,8 @@ No paid services are required to run the project.
 
 AI tools were used during development, as follows:
 
-- **Claude (Anthropic)**: help with planning features, writing and debugging code (for example the notifications page, admin event/fest management, users list and account deletion, Google sign-in) and this README.
-- **TODO:** add every other AI tool you used (for example Cursor, ChatGPT, GitHub Copilot) and what you used it for. List only what you actually used.
+- **Claude (Anthropic)**: helped with planning features, writing and debugging code (for example the notifications page, admin event/fest management, users list and account deletion, Google sign-in) and this README.
+- **ChatGPT**: helped with random discussion and queries, creating home page background picture.
 
 All AI-generated code was reviewed, tested and integrated by the project author.
 
@@ -139,13 +135,13 @@ The application itself does not call any AI service at runtime.
 
 | Page | Screenshot |
 |---|---|
-| Home | ![Home](docs/screenshots/home.png) |
+| Home | ![Home](docs/screenshots/home.png)<br>![Home 2](docs/screenshots/home2.png) |
 | Login with Google button | ![Login](docs/screenshots/login.png) |
 | Events list | ![Events](docs/screenshots/events.png) |
 | Event details and registration | ![Event](docs/screenshots/event-details.png) |
-| Ticket with QR code | ![Ticket](docs/screenshots/ticket.png) |
+| Ticket with QR code | ![Ticket](docs/screenshots/ticket.png) <br>![Ticket PDF](docs/screenshots/ticket2.png) |
 | My registrations | ![My registrations](docs/screenshots/my-registrations.png) |
-| Notifications | ![Notifications](docs/screenshots/notifications.png) |
+| Notifications | ![Notifications](docs/screenshots/notifications.png)<br>![Notifications 2](docs/screenshots/notifications2.png) |
 | Admin dashboard | ![Dashboard](docs/screenshots/admin-dashboard.png) |
 | Admin events and participants | ![Admin events](docs/screenshots/admin-events.png) |
 | Admin users | ![Users](docs/screenshots/admin-users.png) |

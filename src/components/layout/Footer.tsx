@@ -10,7 +10,6 @@ export default function Footer() {
         <div className="flex gap-5 font-medium text-navy">
           <Link href="/fests" className="hover:text-brand">Fests</Link>
           <Link href="/events" className="hover:text-brand">Events</Link>
-          <Link href="/login" className="hover:text-brand">Organizer Login</Link>
         </div>
       </div>
     </footer>
