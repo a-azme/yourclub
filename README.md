@@ -2,36 +2,46 @@
 
 > Events. Fests. Community.
 
-## 1. Project Description
+## 2. Project Description
 
 YourClub is a web platform for college clubs to publish fests and events, and for students to discover and register for them. Students browse fests and events, register in a few clicks, and get a digital ticket with a QR code. Club organizers (admins) manage fests, events, participants and users from a dedicated admin panel.
 
 It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Science Club) to replace paper forms and scattered spreadsheets with one place for registration, capacity control and attendance tracking.
 
-## 2. Features
+## 3. Features
 
-**For students**
+The features are grouped by the judging criteria first, followed by the **extra features**.
+
+### 3.1 Fest Directory
+- **Display available / upcoming fests:** the home page and the Fests page list fests with dates, organizing club and a status (upcoming, live or ended)
+- **Event cards contain useful information:** category, fest name, date and time, venue, live seat availability and a registration status (open, waitlist or closed)
+- **Search events:** search by title, description or venue
+- **Event categories and filters:** filter by category and fest, and sort by start time or registration deadline
+- **Open an event from the fest directory:** a fest page lists its events, and each event page shows the venue, schedule, fee, live seats and a registration deadline countdown
+
+### 3.2 Registration System
+- **Users can register for an event:** one-click registration, confirmed instantly when a seat is free, otherwise placed on a **waitlist**. When a seat opens up, the first person on the waitlist is confirmed automatically
+- **Registration form works correctly:** pre-filled from the student's profile, with validation for name, student ID and mobile number
+- **Registration confirmation:** a confirmation page with a digital ticket and **QR code**, downloadable as a file
+- **Registration limits and deadlines work:** seat limits are enforced in the database, so a full event cannot be over-booked from the app, the API or the Supabase dashboard, and registration closes automatically at the deadline
+- **Users can view and manage their registration:** the My Registrations page shows every registration with its status and lets the student cancel
+
+### 3.3 Organizer Management
+- **Organizer / admin dashboard:** totals, a 14-day registration trend chart, registrations by status and most popular events
+- **View registered participants:** a participant list for every event
+- **Search and filter participants:** search by name, email, phone, student ID or team, and filter by registration status and check-in state
+- **Manage participant registration status:** change a status, or cancel a registration with an optional reason; the student is notified in the app, and the seat limit is respected
+- **Statistics and useful management tools:** seat capacity bars, check-in tracking, **CSV** export of participants, and create, edit and delete **fests** and **events**
+
+### 3.4 Extra Features
 - Sign up / log in with **email and password or with a Google account**
-- Browse upcoming fests and events, with search and category filters
-- Event pages with venue, schedule, fee, live seat availability and registration deadline countdown
-- One-click registration: confirmed instantly when a seat is free, otherwise placed on a **waitlist**. When a seat opens up, the first person on the waitlist is confirmed automatically
-- Digital ticket with **QR code**, downloadable as a file
 - "Add to Google Calendar" link for every registered event
-- My Registrations page with the option to cancel
 - In-app notifications (seat confirmed from the waitlist, cancelled or moved to the waitlist by an organizer) with unread badge and "mark all as read"
-
-**For admins**
-- Dashboard with totals, a 14-day registration trend chart, registrations by status and most popular events
-- Create, edit and delete **fests** and **events**
-- Per-event participant list with status management
-- Cancel a registration with an optional reason; the student is notified in the app
-- Seat limits enforced in the database, so a full event cannot be over-booked from the admin panel, the API or the Supabase dashboard
-- CSV export of participants *(verify this works before submitting)*
-- Check-in tracking
-- Users page: search all accounts, see their registrations, and delete an account
+- Users page for admins: search all accounts, see their registrations, and delete an account
+- Admins can add, edit and delete organizations
 - Role-based access: admin pages and actions are protected both in the app and in the database (Row Level Security)
 
-## 3. Tech Stack
+## 4. Tech Stack
 
 | Area | Technology |
 |---|---|
@@ -44,7 +54,7 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
 | Extras | `qrcode.react` (QR tickets), `papaparse` (CSV export) |
 | Hosting | Vercel |
 
-## 4. Setup Instructions
+## 5. Setup Instructions
 
 **Requirements:** Node.js 20 or newer, npm, and a free [Supabase](https://supabase.com) account.
 
@@ -55,13 +65,13 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
    npm install
    ```
 
-2. **Create a Supabase project**, then open **SQL Editor** and run, in this order:
-   - `supabase/schema.sql` (tables, policies, triggers, views)
-   - `supabase/seed.sql` (demo organizations, fests and events)
+2. **Create a Supabase Project**, then open the **SQL Editor** and run the following files in this order:
 
-   > **TODO:** these two files must be added to the repository before submission. Make sure `schema.sql` includes the `notifications` table and the registration / waitlist triggers, not only the base tables.
+   - `supabase/schema.sql` (tables, triggers, and views)
+   - `supabase/policies.sql` (Row Level Security policies)
+   - `supabase/seed.sql` (demo organizations, fests, and events)
 
-3. **Create the environment file** `.env.local` in the project root:
+3. **Create the environment file** `.env.local` in the project root (copy `.env.example` and fill in the values):
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your-project-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
@@ -70,11 +80,10 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
    - URL and keys are in Supabase: **Project Settings → API**.
    - `SUPABASE_SERVICE_ROLE_KEY` is used only on the server (to delete user accounts). Never expose it or commit it.
 
-4. **Create the demo accounts** in Supabase: **Authentication → Users → Add user** (use the emails in section 6, tick "Auto Confirm User"). Then make the admin an admin:
+4. **Create the demo accounts** in Supabase: **Authentication → Users → Add user** (use the emails in section 7, tick "Auto Confirm User"). Then make the admin an admin (credentials in section 7):
    ```sql
    update public.profiles set role = 'admin' where email = 'admin@yourclub.dev';
    ```
-   Admin login: `admin@yourclub.dev` / `Admin@12345`
 
 5. **(Optional) Enable Google login.** Email/password login works without this step; the "Continue with Google" button only works after it is configured.
    1. In [Google Cloud Console](https://console.cloud.google.com), configure the **OAuth consent screen** (External, scopes `email`, `profile`, `openid`) and set it to **In production** so any Google account can sign in.
@@ -94,20 +103,18 @@ It was built for **DRMC** (clubs such as the IT Club, Robotics Society and Scien
 
 **Production build:** `npm run build` then `npm start`.
 
-## 5. Deployment URL
+## 6. Deployment URL
 
 **https://yourclub-lyart.vercel.app**
 
-## 6. Demo Credentials
+## 7. Demo Credentials
 
 | Role | Email | Password |
 |---|---|---|
 | Admin | `admin@yourclub.dev` | `Admin@12345` |
 | Student | `user@yourclub.dev` | `User@12345` |
 
-The admin panel is at `/admin`. Admin access is only available through the demo admin account above: accounts created with Google (or normal sign up) are always students.
-
-## 7. Third-party Services / APIs
+## 8. Third-party Services / APIs
 
 | Service | Used for |
 |---|---|
@@ -118,59 +125,63 @@ The admin panel is at `/admin`. Admin access is only available through the demo 
 
 No paid services are required to run the project.
 
-## 8. AI Tools / Features Used
+## 9. AI Tools / Features Used
 
 AI tools were used during development, as follows:
 
 - **Claude (Anthropic)**: helped with planning features, writing and debugging code (for example the notifications page, admin event/fest management, users list and account deletion, Google sign-in) and this README.
-- **ChatGPT**: helped with random discussion and queries, creating home page background picture.
+- **ChatGPT**: helped with general queries and generated the home page background image.
 
 All AI-generated code was reviewed, tested and integrated by the project author.
 
 The application itself does not call any AI service at runtime.
 
-## 9. Screenshots
+## 10. Screenshots
 
-**TODO:** save images in `docs/screenshots/` and keep the file names below (or change the links).
+### 10.1 Student (default user) screens
 
 | Page | Screenshot |
 |---|---|
-| Home | ![Home](docs/screenshots/home.png)<br>![Home 2](docs/screenshots/home2.png) |
-| Login with Google button | ![Login](docs/screenshots/login.png) |
-| Events list | ![Events](docs/screenshots/events.png) |
-| Event details and registration | ![Event](docs/screenshots/event-details.png) |
-| Ticket with QR code | ![Ticket](docs/screenshots/ticket.png) <br>![Ticket PDF](docs/screenshots/ticket2.png) |
-| My registrations | ![My registrations](docs/screenshots/my-registrations.png) |
+| Home | ![Home](docs/screenshots/home.png) |
+| Sign up | ![Sign up](docs/screenshots/signup.png) |
+| Login (with Google button) | ![Login](docs/screenshots/login.png) |
+| My profile | ![My profile](docs/screenshots/profile.png)<br>![My profile 2](docs/screenshots/profile2.png) |
+| Fests and events | ![Fests and events](docs/screenshots/fests-events.png) |
+| Event details | ![Event details](docs/screenshots/event-details.png) |
+| Fest details | ![Fest details](docs/screenshots/fest-details.png) |
+| Registration (form and QR ticket) | ![Registration form](docs/screenshots/registration.png)<br>![Ticket with QR code](docs/screenshots/ticket.png)<br>![Ticket download](docs/screenshots/ticket2.png) |
+| My registrations | ![My registrations](docs/screenshots/my-registrations.png)<br>![My registrations 2](docs/screenshots/my-registrations2.png) |
 | Notifications | ![Notifications](docs/screenshots/notifications.png)<br>![Notifications 2](docs/screenshots/notifications2.png) |
-| Admin dashboard | ![Dashboard](docs/screenshots/admin-dashboard.png) |
-| Admin events and participants | ![Admin events](docs/screenshots/admin-events.png) |
-| Admin users | ![Users](docs/screenshots/admin-users.png) |
 
-## 10. Known Limitations
+### 10.2 Admin screens
 
-*(Edit this list so it matches the final project.)*
+| Page | Screenshot |
+|---|---|
+| Admin dashboard | ![Dashboard](docs/screenshots/admin-dashboard.png)<br>![Dashboard 2](docs/screenshots/admin-dashboard2.png) |
+| Add / edit organization | ![Organization form](docs/screenshots/admin-organization.png) |
+| Add / edit fest | ![Fest form](docs/screenshots/admin-fest.png) |
+| Manage users | ![Users](docs/screenshots/admin-users.png) |
+| Manage events and participants | ![Admin events](docs/screenshots/admin-events.png)<br>![Participants](docs/screenshots/admin-participants.png) |
+| Cancel registration | ![Cancel registration](docs/screenshots/cancel-registration.png)<br>![Cancel registration 2](docs/screenshots/cancel-registration2.png) |
+
+## 11. Known Limitations
 
 - No online payment: the event fee is shown for information only.
 - Notifications are in-app only; no email or SMS is sent.
 - Google is the only social login provider.
 - Google login needs your own Google Cloud OAuth credentials; without them only email/password login works.
-- Accounts created with Google may not have student ID, phone or department filled in. **TODO:** confirm after testing and describe exactly what the user is asked to fill in (for example during their first registration).
+- Accounts created with Google may not have student ID, phone or department filled in.
 - Deleting a user removes the account but does not block the same email from signing up again (no ban list).
-- Admin roles can only be changed directly in the database; there is no role-management screen.
-- Deleting a fest or event can affect the registrations linked to it.
+- Admin roles can only be changed directly in the database; there is no role-management screen. Accounts created with Google or normal sign up are always students.
+- Deleting a fest or event also deletes its linked registrations.
 - Times are entered and shown in Bangladesh time (Asia/Dhaka).
 - Designed mainly for desktop and mobile browsers; not tested on older browsers.
-- **TODO:** add anything else you know is unfinished.
 
-## 11. License
+## 12. License
 
-**TODO:** choose a license and add a `LICENSE` file. For a student project, MIT is a common choice:
+[License](LICENSE)
 
-```
-MIT License. See the LICENSE file for details.
-```
-
-## 12. Project Structure
+## 13. Project Structure
 
 ```
 src/
@@ -185,7 +196,3 @@ src/
 ├── lib/                 Supabase clients, queries, helpers, constants
 └── types/               shared TypeScript types
 ```
-
-## 13. Final Decision
-
-The organizing authority reserves the right to make the final decision on rule interpretation, eligibility, judging, scoring and any matter not explicitly covered by the guidelines. All decisions made by the judging panel and the organizing authority are final.
